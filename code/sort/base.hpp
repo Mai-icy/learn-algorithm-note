@@ -1,11 +1,11 @@
+#ifndef BASE_HPP
+#define BASE_HPP
+
 #include <iostream>
 #include <random>
 #include <ctime>
 #include <string>
 #include <time.h>
-
-#ifndef BASE_HPP
-#define BASE_HPP
 
 class SortBase
 {
@@ -57,7 +57,7 @@ int main()
   std::default_random_engine e(time(0));
   std::uniform_int_distribution<unsigned> u(0, 100);
   int test[20];
-  for (size_t times = 0; times < 5; times++)
+  for (size_t times = 0; times < 20; times++)
   {
     for (size_t i = 0; i < 20; i++)
     {

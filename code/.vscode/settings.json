@@ -42,6 +42,9 @@
     "functional": "cpp",
     "iterator": "cpp",
     "numeric": "cpp",
-    "random": "cpp"
+    "random": "cpp",
+    "ctime": "cpp",
+    "set": "cpp",
+    "queue": "cpp"
   }
 }
