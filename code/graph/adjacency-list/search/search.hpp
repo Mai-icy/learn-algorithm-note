@@ -8,9 +8,14 @@ class Search{
         Search(Graph G, int s);
         bool marked(int v);
         int count();
+        ~Search(){delete [] _marked;}
     private:
-        int* _marked = nullptr;
-        int _count;
+        void dfs(Graph G, int s);
+        void bfs(Graph G, int s);
+
+        bool* _marked = nullptr;
+        int _count = 0;
+        int root_node;
 };
 
 #endif

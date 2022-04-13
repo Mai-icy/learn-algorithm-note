@@ -62,7 +62,7 @@ Graph createRondomGraph(int size){
     uniform_int_distribution<unsigned> edge_num_u(0, max_edge_num);
 
     int edge_num = edge_num_u(e);
-    for (size_t i = 0; i< edge_num; i++){
+    for (int i = 0; i < edge_num; i++){
         int v = u(e);
         int w = u(e);
         new_graph.addEdge(w, v);

@@ -1,7 +1,10 @@
 #ifndef BAG_HPP
 #define BAG_HPP
+#include <iostream>
+#include <typeinfo>
 
-template <class T>
+
+template <typename T>
 struct Node
 {
     T item;
@@ -9,13 +12,13 @@ struct Node
     ~Node() { delete next; };
 };
 
-template <class T>
+template <typename T>
 class Bag
 {
 public:
     Bag() {}
-    Bag(const Bag &o_bag);
-    
+    // Bag(const Bag &o_bag);
+
     void add(T item)
     {
         Node<T> *oldFirst = first;
@@ -26,11 +29,12 @@ public:
     ~Bag() { delete first; }
     Bag &operator=(const Bag &o_bag);
 
+    friend std::ostream &operator<<(std::ostream &os, const Bag<T> &bag);
+
 private:
     Node<T> *first = nullptr;
 
 public:
-    //定义迭代器
     class BagIterator
     {
         friend class Bag; //声明为友元
@@ -75,17 +79,33 @@ public:
         BagIterator(Node<T> *p) : current(p) {} //上面声明了友元，所以才能调用这个构造函数
         Node<T> *current = nullptr;
     };
-
-    //定义相关的迭代器用法
     BagIterator begin()
     {
         return BagIterator(first);
     }
-
     BagIterator end()
     {
         return BagIterator(nullptr);
     }
 };
 
+template <typename T>
+std::ostream &operator<<(std::ostream &os, const Bag<T> &bag)
+{
+    os << "Bag<" << typeid(T).name() << "> [";
+    for(auto item: bag){
+        os << item << ",";
+    }
+    os << ']';
+    return os;
+}
+
+// template <typename T>
+// Bag<T>::Bag(const Bag<T> &o_bag)
+// {
+//     for (auto item : o_bag)
+//     {
+//         add(item);
+//     }
+// }
 #endif
