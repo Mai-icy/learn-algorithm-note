@@ -3,7 +3,6 @@
 #include <iostream>
 #include <typeinfo>
 
-
 template <typename T>
 struct Node
 {
@@ -17,7 +16,7 @@ class Bag
 {
 public:
     Bag() {}
-    // Bag(const Bag &o_bag);
+    Bag(const Bag &o_bag);
 
     void add(T item)
     {
@@ -29,7 +28,8 @@ public:
     ~Bag() { delete first; }
     Bag &operator=(const Bag &o_bag);
 
-    friend std::ostream &operator<<(std::ostream &os, const Bag<T> &bag);
+    template <typename T1>
+    friend std::ostream &operator<<(std::ostream &os, const Bag<T1> &bag);
 
 private:
     Node<T> *first = nullptr;
@@ -42,22 +42,10 @@ public:
         BagIterator() {}
 
         //重载相关的运算符
-        bool operator==(const BagIterator &iter) const
-        {
-            return current == iter.current;
-        }
-
-        bool operator!=(const BagIterator &iter) const
-        {
-            return current != iter.current;
-        }
-
-        T &operator*() const
-        {
-            return current->item;
-        }
-
-        BagIterator operator++(int) const
+        bool operator==(const BagIterator &iter) const { return current == iter.current; }
+        bool operator!=(const BagIterator &iter) const { return current != iter.current; }
+        const T &operator*() const { return current->item; }
+        BagIterator operator++(int)
         {
             BagIterator temp = *this;
             current = current->next;
@@ -77,35 +65,50 @@ public:
 
     protected:
         BagIterator(Node<T> *p) : current(p) {} //上面声明了友元，所以才能调用这个构造函数
-        Node<T> *current = nullptr;
+        const Node<T> * current = nullptr;
     };
-    BagIterator begin()
-    {
-        return BagIterator(first);
-    }
-    BagIterator end()
-    {
-        return BagIterator(nullptr);
-    }
+
+    BagIterator begin() const { return BagIterator(first); }
+    BagIterator end() const { return BagIterator(nullptr); }
 };
 
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const Bag<T> &bag)
 {
     os << "Bag<" << typeid(T).name() << "> [";
-    for(auto item: bag){
-        os << item << ",";
+    for (auto it : bag)
+    {
+        os << it << ",";
     }
+    os.put('\b');
     os << ']';
     return os;
 }
 
-// template <typename T>
-// Bag<T>::Bag(const Bag<T> &o_bag)
-// {
-//     for (auto item : o_bag)
-//     {
-//         add(item);
-//     }
-// }
+template <typename T>
+Bag<T> &Bag<T>::operator=(Bag<T> const &o_bag)
+{
+    if (this == &o_bag)
+    {
+        return *this;
+    }
+    delete first;
+    first = nullptr;
+
+    for (auto it : o_bag)
+    {
+        add(it);
+    }
+    return *this;
+}
+
+template <typename T>
+Bag<T>::Bag(const Bag<T> &o_bag)
+{
+    for (auto it : o_bag)
+    {
+        add(it);
+    }
+}
+
 #endif

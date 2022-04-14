@@ -11,7 +11,7 @@ class Graph
 {
 public:
     Graph(int v);
-    Graph(const Graph &G);
+    Graph(Graph &G);
 
     int V() { return vertex_num; };
     int E() { return edge_num; };
@@ -20,7 +20,7 @@ public:
     Bag<int> adj(int v);
 
     ~Graph() { delete[] _adj; }
-    Graph operator=(const Graph &G);
+    Graph &operator=(Graph &G);
 
 private:
     int vertex_num;
@@ -29,14 +29,30 @@ private:
 };
 
 
-Graph::Graph(const Graph &G){
+Graph::Graph(Graph &G){
     vertex_num = G.vertex_num;
     edge_num = G.edge_num;
     _adj = new Bag<int>[vertex_num];
     
-    // todo
-
+    for (int v = 0; v < vertex_num; v++){
+        _adj[v] = G._adj[v];
+    }
 }
+
+Graph &Graph::operator=(Graph &G){
+    if (this == &G){
+        return *this;
+    }
+    delete [] _adj;
+    vertex_num = G.vertex_num;
+    edge_num = G.edge_num;
+    _adj = new Bag<int>[vertex_num];
+    for (int v = 0; v < vertex_num; v++){
+        _adj[v] = G._adj[v];
+    }
+    return *this;
+}
+
 Graph::Graph(int v) : vertex_num(v), edge_num(0), _adj(new Bag<int>[v]) {}
 inline void Graph::addEdge(int v, int w)
 {
