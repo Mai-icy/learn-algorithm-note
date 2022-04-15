@@ -1,7 +1,7 @@
 #include "search.hpp"
 #include <queue>
 
-Search::Search(Graph G, int s) : root_node(s), _marked(new bool[G.V()]{false})
+Search::Search(Graph G, int s) : _marked(new bool[G.V()]{false}), root_node(s)
 {
     bfs(G, s);
 }
@@ -17,8 +17,12 @@ void Search::bfs(Graph G, int s)
         que_marked.pop();
         for (int w : G.adj(v))
         {
-            _marked[w] = true;
-            que_marked.push(w);
+            if (!_marked[w])
+            {
+                _marked[w] = true;
+                que_marked.push(w);
+                _count++;
+            }
         }
     }
 }

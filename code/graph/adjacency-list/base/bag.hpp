@@ -18,6 +18,7 @@ public:
     Bag() {}
     Bag(const Bag &o_bag);
 
+    bool isEmpty() const { return !(first); }
     void add(T item)
     {
         Node<T> *oldFirst = first;
@@ -65,7 +66,7 @@ public:
 
     protected:
         BagIterator(Node<T> *p) : current(p) {} //上面声明了友元，所以才能调用这个构造函数
-        const Node<T> * current = nullptr;
+        const Node<T> *current = nullptr;
     };
 
     BagIterator begin() const { return BagIterator(first); }
@@ -76,6 +77,11 @@ template <typename T>
 std::ostream &operator<<(std::ostream &os, const Bag<T> &bag)
 {
     os << "Bag<" << typeid(T).name() << "> [";
+    if (bag.isEmpty())
+    {
+        os << ']';
+        return os;
+    }
     for (auto it : bag)
     {
         os << it << ",";
@@ -86,7 +92,7 @@ std::ostream &operator<<(std::ostream &os, const Bag<T> &bag)
 }
 
 template <typename T>
-Bag<T> &Bag<T>::operator=(Bag<T> const &o_bag)
+Bag<T> &Bag<T>::operator=(const Bag<T> &o_bag)
 {
     if (this == &o_bag)
     {
