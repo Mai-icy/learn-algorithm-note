@@ -1,5 +1,5 @@
-#ifndef SEARCH_HPP
-#define SEARCH_HPP
+#ifndef PATH_HPP
+#define PATH_HPP
 
 #include "..\\base\\undirected-graph.hpp"
 
