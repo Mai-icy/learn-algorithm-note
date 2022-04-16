@@ -16,3 +16,11 @@ void UF::connect(int w, int v)
     id[w] = v;
     _count--;
 }
+
+int main()
+{
+    using namespace std;
+    UF test = createRandomUF(20, 4);
+    cout << test;
+    return 0;
+}

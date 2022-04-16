@@ -92,20 +92,6 @@ std::ostream &operator<<(std::ostream &os, const UF &uf)
     return os;
 }
 
-class WUF : public UF
-{
-public:
-    WUF(int n) : UF(n), sz(new int[n])
-    {
-        for (int i = 0; i < n; i++)
-            sz[i] = 1;
-    }
-    ~WUF() { delete[] sz; }
-    void connect(int w, int v);
-    int find(int v) const;
 
-protected:
-    int *sz;
-};
 
 #endif
