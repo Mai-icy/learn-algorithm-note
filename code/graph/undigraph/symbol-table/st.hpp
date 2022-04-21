@@ -6,7 +6,7 @@ class SymbolGraph
 {
 public:
     SymbolGraph(int size);
-    ~SymbolGraph() { delete str_arr; };
+    ~SymbolGraph() { delete[] str_arr; };
     bool contains(std::string key) { return str_map.find(key) != str_map.end(); };
     int index(std::string key) { return str_map[key]; };
     std::string name(int v) { return str_arr[v]; };

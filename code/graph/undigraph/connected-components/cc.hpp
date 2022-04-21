@@ -7,7 +7,7 @@ class CC
 {
 public:
     CC(Graph G);
-    ~CC() {delete marked, _id;}
+    ~CC() {delete [] marked, _id;}
 
     bool connect(int v, int w);
     int count() {return _count;};

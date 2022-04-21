@@ -1,26 +1,28 @@
-#ifndef BASE_GRAPH_HPP
-#define BASE_GRAPH_HPP
+#ifndef DIGRAPH_HPP
+#define DIGRAPH_HPP
 
 #include <iostream>
 #include <random>
 #include <ctime>
 #include "bag.hpp"
 
-class Graph
+class Digraph
 {
 public:
-    Graph(int v);
-    Graph(const Graph &G);
-    ~Graph() { delete[] _adj; }
+    Digraph(int v);
+    Digraph(const Digraph &G);
+    ~Digraph() { delete[] _adj; }
 
     int V() { return vertex_num; };
     int E() { return edge_num; };
 
     void addEdge(int v, int w);
-    Bag<int> adj(int v) {return _adj[v];} ;
- 
-    Graph &operator=(const Graph &G);
-    friend std::ostream &operator<<(std::ostream &os, const Graph &G);
+    Bag<int> adj(int v) { return _adj[v]; };
+
+    Digraph reverse();
+
+    Digraph &operator=(const Digraph &G);
+    friend std::ostream &operator<<(std::ostream &os, const Digraph &G);
 
 private:
     int vertex_num;
@@ -28,9 +30,9 @@ private:
     Bag<int> *_adj;
 };
 
-Graph::Graph(int v) : vertex_num(v), edge_num(0), _adj(new Bag<int>[v]) {}
+Digraph::Digraph(int v) : vertex_num(v), edge_num(0), _adj(new Bag<int>[v]) {}
 
-Graph::Graph(const Graph &G)
+Digraph::Digraph(const Digraph &G)
 {
     vertex_num = G.vertex_num;
     edge_num = G.edge_num;
@@ -40,7 +42,7 @@ Graph::Graph(const Graph &G)
         _adj[v] = G._adj[v];
 }
 
-Graph &Graph::operator=(const Graph &G)
+Digraph &Digraph::operator=(const Digraph &G)
 {
     if (this == &G)
         return *this;
@@ -55,7 +57,7 @@ Graph &Graph::operator=(const Graph &G)
     return *this;
 }
 
-inline std::ostream &operator<<(std::ostream &os, const Graph &G)
+inline std::ostream &operator<<(std::ostream &os, const Digraph &G)
 {
     using namespace std;
     for (int i = 0; i < G.vertex_num; i++)
@@ -63,22 +65,30 @@ inline std::ostream &operator<<(std::ostream &os, const Graph &G)
     return os;
 }
 
-inline void Graph::addEdge(int v, int w)
+inline void Digraph::addEdge(int v, int w)
 {
     for (int temp : adj(v))
         if (temp == w)
             return;
     if (v == w)
         return;
-    _adj[v].add(w);
-    _adj[w].add(v);
+    _adj[v].add(w); // 有向图只加一边
     edge_num++;
 }
 
-Graph createRondomGraph(int size)
+Digraph Digraph::reverse()
+{
+    Digraph reverse_digraph(vertex_num);
+    for (int i = 0; i < vertex_num; i++)
+        for (int v : _adj[i])
+            reverse_digraph.addEdge(v, i);
+    return reverse_digraph;
+}
+
+Digraph createRondomDigraph(int size)
 {
     using namespace std;
-    Graph new_graph(size);
+    Digraph new_graph(size);
 
     default_random_engine e(time(0));
     uniform_int_distribution<unsigned> u(0, size - 1);
