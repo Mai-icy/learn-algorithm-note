@@ -45,6 +45,7 @@
     "random": "cpp",
     "ctime": "cpp",
     "set": "cpp",
-    "queue": "cpp"
+    "queue": "cpp",
+    "map": "cpp"
   }
 }

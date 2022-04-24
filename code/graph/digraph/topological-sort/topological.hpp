@@ -7,7 +7,7 @@
 class Topological
 {
 public:
-    Topological(Digraph G);
+    Topological(WeightedDigraph G);
     ~Topological() { delete[] marked, onStack; }
 
     bool isDAG() const { return !resOrder.isEmpty(); };
@@ -18,10 +18,10 @@ private:
     bool *onStack;
     Bag<int> resOrder;
 
-    void dfs(Digraph G, int v);
+    void dfs(WeightedDigraph G, int v);
 };
 
-Topological::Topological(Digraph G) : marked(new bool[G.V()]), onStack(new bool[G.V()])
+Topological::Topological(WeightedDigraph G) : marked(new bool[G.V()]), onStack(new bool[G.V()])
 {
     DirectedCycle dc(G);
     if (!dc.hasCycle())
@@ -29,7 +29,7 @@ Topological::Topological(Digraph G) : marked(new bool[G.V()]), onStack(new bool[
         dfs(G, 0);
     }
 }
-void Topological::dfs(Digraph G, int v)
+void Topological::dfs(WeightedDigraph G, int v)
 {
     marked[v] = true;
     for (int w : G.adj(v))

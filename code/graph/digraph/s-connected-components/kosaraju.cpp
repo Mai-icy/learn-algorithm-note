@@ -1,7 +1,7 @@
 #include "SCC.hpp"
 #include "../topological-sort/topological.hpp"
 
-SCC::SCC(Digraph G) : _id(new int[G.V()]), marked(new bool[G.V()])
+SCC::SCC(WeightedDigraph G) : _id(new int[G.V()]), marked(new bool[G.V()])
 {
     Topological ts(G.reverse());
     for (int s : ts.order())
@@ -14,7 +14,7 @@ SCC::SCC(Digraph G) : _id(new int[G.V()]), marked(new bool[G.V()])
     }
 }
 
-void SCC::dfs(Digraph G, int v)
+void SCC::dfs(WeightedDigraph G, int v)
 {
     marked[v] = true;
     _id[v] = _count;

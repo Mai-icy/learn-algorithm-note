@@ -6,7 +6,7 @@
 class SCC
 {
 public:
-    SCC(Digraph G);
+    SCC(WeightedDigraph G);
     ~SCC() { delete[] _id, marked; }
 
     bool stronglyConnected(int v, int w) const { return _id[w] == _id[v]; };
@@ -14,7 +14,7 @@ public:
     int id(int v) const { return _id[v]; };
 
 private:
-    void dfs(Digraph G, int s);
+    void dfs(WeightedDigraph G, int s);
 
     int *_id;
     bool *marked;

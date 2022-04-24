@@ -1,12 +1,12 @@
 #include "path.hpp"
 #include <queue>
 
-Path::Path(Digraph G, int s) : _marked(new bool[G.V()]{false}), edgeTo(new int[G.V()]), root_node(s)
+Path::Path(WeightedDigraph G, int s) : _marked(new bool[G.V()]{false}), edgeTo(new int[G.V()]), root_node(s)
 {
     bfs(G, s);
 }
 
-void Path::bfs(Digraph G, int s)
+void Path::bfs(WeightedDigraph G, int s)
 {
     using namespace std;
     queue<int> b_que;
