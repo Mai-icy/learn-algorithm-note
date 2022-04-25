@@ -205,7 +205,7 @@ C --> A
 | hasCycle()               | G是否存在有向环                | bool     |
 | cycle()                  | 有向环中的所有顶点（如果存在） | Bag<int> |
 
-#### 头文件
+头文件
 
 ```c++
 class DirectedCycle
@@ -293,7 +293,7 @@ graph TB
 8 -->7 ; 7-->6;
 ```
 
-以上图的排序结果：
+以上图的排序结果(理想)：
 
 ```mermaid
 graph LR
@@ -302,6 +302,214 @@ graph LR
 11((5));12((4))
 0 --> 1;1 --> 2;2 --> 3;3 --> 4;4 --> 5;5 --> 6;6 --> 7;7 --> 8;8 --> 9;9 --> 10;10 --> 11;11 --> 12;
 ```
+
+#### 拓扑排序API
+
+| 接口                           | 操作                        | 返回类型 |
+| ------------------------------ | --------------------------- | -------- |
+| Topological(WeightedDigraph G) | 对有向图G的节点进行拓扑排序 | 构造函数 |
+| isDAG()                        | 图是否有环                  | bool     |
+| order()                        | 返回拓扑排序的结果          | Bag<int> |
+
+头文件
+
+```c++
+class Topological
+{
+public:
+    Topological(WeightedDigraph G);
+    ~Topological() { delete[] marked, onStack; }
+
+    bool isDAG() const { return !resOrder.isEmpty(); };
+    Bag<int> order() const { return resOrder; };
+
+private:
+    bool *marked;
+    bool *onStack;
+    Bag<int> resOrder;
+
+    void dfs(WeightedDigraph G, int v);
+};
+```
+
+思路：
+
+1.根据拓扑排序遍历顶点
+
+2.每次dfs操作后将点加入栈
+
+3.遍历结束后栈的结果即为拓扑排序顺序
+
+实现：
+
+```c++
+Topological::Topological(WeightedDigraph G) : marked(new bool[G.V()]), onStack(new bool[G.V()])
+{
+    DirectedCycle dc(G);
+    if (!dc.hasCycle())
+    {
+        dfs(G, 0);
+    }
+}
+void Topological::dfs(WeightedDigraph G, int v)
+{
+    marked[v] = true;
+    for (int w : G.adj(v))
+    {
+        if(!marked[w])
+            dfs(G, w);
+    }
+    resOrder.add(v);
+}
+```
+
+分析：主要的实现方法为DFS。首先，DFS会遍历所有的点，其次拓扑排序不一定只有一种结果。以下图为例。
+
+```mermaid
+graph LR
+
+0((0));1((1));2((2));3((3));4((4));
+0 --> 4; 1-->0; 3-->0; 2-->3; 1-->2; 2-->4;
+```
+
+**当从0开始**进行DFS(先0->4再1->2->3)被忽略的关系2 -> 4 ; 3 -> 0 ; 1 -> 0;
+
+```mermaid
+graph TB
+0((0));1((1));2((2));3((3));4((4));
+1 --> 2;
+2 --> 3;
+0 --> 4;
+
+```
+
+**当从1开始**，被忽略的关系3 -> 0; 2->4
+
+```mermaid
+graph TB
+0((0));1((1));2((2));3((3));4((4));
+1-->0-->4;1-->2-->3;
+```
+
+**当从2开始**，被忽略的关系1 -> 0; 1 -> 2; 2 -> 4
+
+```mermaid
+graph TB
+0((0));1((1));2((2));3((3));4((4));
+2-->3-->0-->4;
+```
+
+**当从3开始**，被忽略的关系1 -> 0; 2 -> 3; 2 -> 4
+
+```mermaid
+graph TB
+0((0));1((1));2((2));3((3));4((4));
+3-->0-->4; 1-->2;
+```
+
+分析：以上可发现被无视的有向边均为新节点指向旧树。也就是说**旧节点不可能再指向新节点**，它们应当被放在排序的最后端。
+
+原因：DFS保证生成的树已为最深，确保遍历了每个点的指向，以保证不会再有旧节点指向新的节点，不会被指向的节点作为排序尾理所应当，故不断排入尾即可。最后再利用stack逆序。
+
+#### 有向图强连通分量API
+
+| 接口                            | 操作                 | 返回类型 |
+| ------------------------------- | -------------------- | -------- |
+| SCC(WeightedDigraph G)          | 查找G图中的          | 构造函数 |
+| stronglyConnected(int v, int w) | 查看w，v点是否强连通 | bool     |
+| count()                         | 查看强连通分量的数量 | int      |
+| id(int v)                       | 查看v点所在连通分量  | int      |
+
+头文件
+
+```c++
+class SCC
+{
+public:
+    SCC(WeightedDigraph G);
+    ~SCC() { delete[] _id, marked; }
+
+    bool stronglyConnected(int v, int w) const { return _id[w] == _id[v]; };
+    int count() const { return _count; };
+    int id(int v) const { return _id[v]; };
+
+private:
+    void dfs(WeightedDigraph G, int s);
+
+    int *_id;
+    bool *marked;
+    int _count = 0;
+};
+```
+
+有向图也存在连通性问题，但在有向图中，被称为**强连通性**。在一条有向环中，各个顶点都互相强连通。
+
+##### Kosaraju算法
+
+思路：
+
+1.利用DFS的拓扑排序（DFO）对G的反向图进行排序
+
+2.按照1得到的顺序对G进行DFS
+
+3.其中同一个DFS中遇到的点都在同一个强连通分量中
+
+实现：
+
+```c++
+SCC::SCC(WeightedDigraph G) : _id(new int[G.V()]), marked(new bool[G.V()])
+{
+    Topological ts(G.reverse());
+    for (int s : ts.order())
+    {
+        if (!marked[s])
+        {
+            dfs(G, s);
+            _count++;
+        }
+    }
+}
+
+void SCC::dfs(WeightedDigraph G, int v)
+{
+    marked[v] = true;
+    _id[v] = _count;
+    for (int w : G.adj(v))
+        if (!marked[w])
+            dfs(G, w);
+}
+
+```
+
+分析：**Kosaraju算法**简单但难以理解，首先要理解DFO在有环图中的排序行为。
+
+深入**拓扑排序DFO**
+
+1.DFO一棵树内关系
+
+DFO对第一个起点进行DFS，即从起点生成一棵树。其中生成的第一颗树，我们可以发现起点为这个树的**根**，并且对于树的任一节点，都存在起点到节点的**有向路径**。
+
+2.DFO多颗树先后关系
+
+若生成多颗树，即为存在起点无法连接到的点，其中，由于第一颗树保证了深度最大，不会指向后面的节点，换句话说，后面生成的树中的任一节点不会被前面的旧节点指向。
+
+第一步：对G的反向图同样分析
+
+若逆后序为⑥|①|⓪⑤③②④|⑦⑧
+
+其中⑥①不会指向后面的节点⑤③②④有指向⓪的路径。则如果⓪有指向⑤③②④中的任一节点，那必成为一有向环，即为同一连通分量。且⓪⑤③②④中的任一节点不可能指向之后的节点。又⓪⑤③②④是拓扑排序保证了⑤③不可能指向②④，除非在同一树枝上。
+
+```mermaid
+graph BT
+0((0));5((5));2((2));3((3));4((4));
+4-->2-->0;3-->5-->0;
+```
+
+例如②可以指向④，⑤可以指向③，这一点是DFO的特性，也保证了Kosaraju算法的正确性。
+
+第二步：
+
+
 
 
 
