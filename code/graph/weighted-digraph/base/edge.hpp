@@ -6,7 +6,7 @@
 class DirectedEdge
 {
 public:
-    DirectedEdge() : v(0), w(0), weight_(0){};
+    DirectedEdge() : v(-1), w(-1), weight_(0){};
     DirectedEdge(int v, int w, double wei) : v(v), w(w), weight_(wei){};
 
     double weight() const { return weight_; };
