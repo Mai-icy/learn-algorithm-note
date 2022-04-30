@@ -11,6 +11,15 @@ public:
     MST();
     Bag<DirectedEdge> edges();
     double weight();
+
 private:
     ;
 };
+
+typedef std::pair<int, double> ele;
+class greater_point
+{
+    bool operator()(const ele &__x, const ele &__y) const { return __x > __y; }
+};
+
+typedef std::priority_queue<ele, std::vector<ele>, greater_point> point_pq;
