@@ -18,7 +18,7 @@ public:
     int E() const { return edge_num; };
 
     void addEdge(int v, int w, double weight);
-    Bag<DirectedEdge> adj(int v) const  { return _adj[v]; };
+    Bag<DirectedEdge> adj(int v) const { return _adj[v]; };
 
     WeightedDigraph reverse() const;
 
@@ -43,6 +43,7 @@ public:
 
     void addEdge(int v, int w, double weight);
     Bag<Edge> adj(int v) { return _adj[v]; };
+    Bag<Edge> edges();
 
     WeightedGraph &operator=(const WeightedGraph &G);
     friend std::ostream &operator<<(std::ostream &os, const WeightedGraph &G);
@@ -52,6 +53,16 @@ private:
     int edge_num;
     Bag<Edge> *_adj;
 };
+
+Bag<Edge> WeightedGraph::edges()
+{
+    Bag<Edge> res;
+    for (int v = 0; v < vertex_num; v++)
+        for (Edge e : _adj[v])
+            if (e.other(v) > v)
+                res.add(e);
+    return res;
+}
 
 WeightedDigraph::WeightedDigraph(int v) : vertex_num(v), edge_num(0), _adj(new Bag<DirectedEdge>[v]) {}
 
@@ -97,7 +108,7 @@ inline void WeightedDigraph::addEdge(int v, int w, double weight)
     edge_num++;
 }
 
-WeightedDigraph WeightedDigraph::reverse()const
+WeightedDigraph WeightedDigraph::reverse() const
 {
     WeightedDigraph reverse_digraph(vertex_num);
     for (int i = 0; i < vertex_num; i++)
@@ -105,7 +116,6 @@ WeightedDigraph WeightedDigraph::reverse()const
             reverse_digraph.addEdge(v.to(), v.from(), v.weight());
     return reverse_digraph;
 }
-
 
 WeightedGraph::WeightedGraph(int v) : vertex_num(v), edge_num(0), _adj(new Bag<Edge>[v]) {}
 
@@ -151,7 +161,6 @@ inline void WeightedGraph::addEdge(int v, int w, double weight)
     _adj[w].add(edge);
     edge_num++;
 }
-
 
 WeightedDigraph createRondomDigraph(int size)
 {
@@ -200,6 +209,5 @@ WeightedGraph createRondomGraph(int size)
     }
     return new_graph;
 }
-
 
 #endif

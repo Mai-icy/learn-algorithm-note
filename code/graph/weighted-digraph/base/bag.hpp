@@ -4,7 +4,6 @@
 #include <typeinfo>
 #include "edge.hpp"
 
-
 template <typename T>
 struct Node
 {
@@ -21,8 +20,10 @@ public:
     Bag(const Bag &o_bag);
 
     bool isEmpty() const { return !(first); }
+    int size() const { return size_; }
     void add(T item)
     {
+        size_ += 1;
         Node<T> *oldFirst = first;
         first = new Node<T>();
         first->item = item;
@@ -36,6 +37,7 @@ public:
 
 private:
     Node<T> *first = nullptr;
+    int size_ = 0;
 
 public:
     class BagIterator
