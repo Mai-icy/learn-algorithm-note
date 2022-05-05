@@ -1,9 +1,11 @@
+#ifndef SP_HPP
+#define SP_HPP
+
 #include "../base/weighted-graph.hpp"
 #include <queue>
 #include <vector>
 #include <functional>
 
-typedef std::priority_queue<BaseEdge, std::vector<BaseEdge>, std::greater<BaseEdge>> edge_pq;
 class SP
 {
 public:
@@ -27,5 +29,4 @@ Bag<DirectedEdge> SP::pathTo(int v)
     return res_bag;
 }
 
-
-
+#endif

@@ -18,7 +18,9 @@ public:
     int E() const { return edge_num; };
 
     void addEdge(int v, int w, double weight);
+    void addEdge(DirectedEdge e);
     Bag<DirectedEdge> adj(int v) const { return _adj[v]; };
+    Bag<DirectedEdge> edges();
 
     WeightedDigraph reverse() const;
 
@@ -64,6 +66,15 @@ Bag<Edge> WeightedGraph::edges()
     return res;
 }
 
+Bag<DirectedEdge> WeightedDigraph::edges()
+{
+    Bag<DirectedEdge> res;
+    for (int v = 0; v < vertex_num; v++)
+        for (DirectedEdge e : _adj[v])
+            res.add(e);
+    return res;
+}
+
 WeightedDigraph::WeightedDigraph(int v) : vertex_num(v), edge_num(0), _adj(new Bag<DirectedEdge>[v]) {}
 
 WeightedDigraph::WeightedDigraph(const WeightedDigraph &G)
@@ -105,6 +116,12 @@ inline void WeightedDigraph::addEdge(int v, int w, double weight)
         return;
     DirectedEdge edge(v, w, weight);
     _adj[v].add(edge); // 有向图只加一边
+    edge_num++;
+}
+
+inline void WeightedDigraph::addEdge(DirectedEdge e)
+{
+    _adj[e.from()].add(e);
     edge_num++;
 }
 
