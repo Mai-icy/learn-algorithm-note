@@ -1,12 +1,12 @@
 #ifndef PATH_HPP
 #define PATH_HPP
 
-#include "..\\base\\digraph.hpp"
+#include "..\\..\\base\\digraph.hpp"
 
 class Path
 {
 public:
-    Path(WeightedDigraph G, int s);
+    Path(Digraph G, int s);
     ~Path() { delete[] _marked; }
 
     Bag<int> pathTo(int v);
@@ -15,8 +15,8 @@ public:
     int count() const { return _count; };
 
 private:
-    void dfs(WeightedDigraph G, int s);
-    void bfs(WeightedDigraph G, int s);
+    void dfs(Digraph G, int s);
+    void bfs(Digraph G, int s);
 
     bool *_marked = nullptr;
     int *edgeTo = nullptr;
@@ -41,7 +41,7 @@ Bag<int> Path::pathTo(int v)
 int main(){
     using namespace std;
     
-    WeightedDigraph test = createRondomDigraph(10);
+    Digraph test = createRondomDigraph(10);
     Path test2(test, 0);
     cout << test<<endl;
     cout << test2.pathTo(9);

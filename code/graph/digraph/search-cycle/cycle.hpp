@@ -1,18 +1,18 @@
 #ifndef CYCLE_HPP
 #define CYCLE_HPP
-#include "../base/digraph.hpp"
+#include "../../base/digraph.hpp"
 #include <stack>
 
 class DirectedCycle
 {
 public:
-    DirectedCycle(WeightedDigraph G);
+    DirectedCycle(Digraph G);
     ~DirectedCycle(){ delete [] onStack, edgeTo;}
     bool hasCycle() { return !_cycle.isEmpty(); };
     Bag<int> cycle() { return _cycle; };
 
 private:
-    void dfs(WeightedDigraph G, int s);
+    void dfs(Digraph G, int s);
 
     Bag<int> _cycle;
     bool *marked;
@@ -20,7 +20,7 @@ private:
     int *edgeTo;
 };
 
-DirectedCycle::DirectedCycle(WeightedDigraph G) : marked(new bool[G.V()]), onStack(new bool[G.V()]), edgeTo(new int[G.V()])
+DirectedCycle::DirectedCycle(Digraph G) : marked(new bool[G.V()]), onStack(new bool[G.V()]), edgeTo(new int[G.V()])
 {
     for (int i = 0; i < G.V(); i++)
     {
@@ -31,7 +31,7 @@ DirectedCycle::DirectedCycle(WeightedDigraph G) : marked(new bool[G.V()]), onSta
     }
 }
 
-void DirectedCycle::dfs(WeightedDigraph G, int s)
+void DirectedCycle::dfs(Digraph G, int s)
 {
     onStack[s] = true;
     marked[s] = true;

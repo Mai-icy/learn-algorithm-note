@@ -1,4 +1,4 @@
-#include "../base/undirected-graph.hpp"
+#include "../../base/graph.hpp"
 #include <map>
 #include <string>
 

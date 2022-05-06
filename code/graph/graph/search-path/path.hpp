@@ -1,7 +1,7 @@
 #ifndef PATH_HPP
 #define PATH_HPP
 
-#include "..\\base\\undirected-graph.hpp"
+#include "../../base/graph.hpp"
 
 class Path
 {

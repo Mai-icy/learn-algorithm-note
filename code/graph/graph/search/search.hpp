@@ -1,7 +1,7 @@
 #ifndef SEARCH_HPP
 #define SEARCH_HPP
 
-#include "..\\base\\undirected-graph.hpp"
+#include "../../base/graph.hpp"
 
 class Search
 {

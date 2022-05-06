@@ -1,13 +1,13 @@
 #ifndef TOPOLOGICAL_HPP
 #define TOPOLOGICAL_HPP
 
-#include "../base/digraph.hpp"
+#include "../../base/digraph.hpp"
 #include "../search-cycle/cycle.hpp"
 
 class Topological
 {
 public:
-    Topological(WeightedDigraph G);
+    Topological(Digraph G);
     ~Topological() { delete[] marked, onStack; }
 
     bool isDAG() const { return !resOrder.isEmpty(); };
@@ -18,10 +18,10 @@ private:
     bool *onStack;
     Bag<int> resOrder;
 
-    void dfs(WeightedDigraph G, int v);
+    void dfs(Digraph G, int v);
 };
 
-Topological::Topological(WeightedDigraph G) : marked(new bool[G.V()]), onStack(new bool[G.V()])
+Topological::Topological(Digraph G) : marked(new bool[G.V()]), onStack(new bool[G.V()])
 {
     DirectedCycle dc(G);
     if (!dc.hasCycle())
@@ -29,7 +29,7 @@ Topological::Topological(WeightedDigraph G) : marked(new bool[G.V()]), onStack(n
         dfs(G, 0);
     }
 }
-void Topological::dfs(WeightedDigraph G, int v)
+void Topological::dfs(Digraph G, int v)
 {
     marked[v] = true;
     for (int w : G.adj(v))

@@ -1,7 +1,7 @@
 #ifndef SP_HPP
 #define SP_HPP
 
-#include "../base/weighted-graph.hpp"
+#include "../../base/weighted-digraph.hpp"
 #include <queue>
 #include <vector>
 #include <functional>

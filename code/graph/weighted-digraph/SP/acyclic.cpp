@@ -34,9 +34,17 @@ AcyclicSP::AcyclicSP(WeightedDigraph G, int s) : distTo_(new double[G.V()]), edg
     for (int i = 0; i < G.V(); i++)
         distTo_[i] = INFINITY;
     distTo_[s] = 0.0;
-    Topological top(G);
-    for (int v:top.order()){
-        relax(G,v);
+    Topological top(remove_weight(G));
+    for (int v : top.order())
+    {
+        relax(G, v);
     }
+}
 
+Digraph remove_weight(const WeightedDigraph &G)
+{
+    Digraph res(G.V());
+    for (DirectedEdge e:G.edges())
+        res.addEdge(e.from(), e.to());
+    return res;
 }

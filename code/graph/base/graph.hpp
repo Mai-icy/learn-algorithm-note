@@ -1,40 +1,30 @@
-#ifndef DIGRAPH_HPP
-#define DIGRAPH_HPP
+#ifndef GRAPH_HPP
+#define GRAPH_HPP
 
 #include "base/basegraph.hpp"
 
-class Digraph : public BaseUnweightedGraph
-
+class Graph : public BaseUnweightedGraph
 {
 public:
-    Digraph(int v) : BaseUnweightedGraph(v){};
+    Graph(int v) : BaseUnweightedGraph(v){};
     void addEdge(int v, int w);
-    Digraph reverse();
 
-    friend std::ostream &operator<<(std::ostream &os, const Digraph &G);
+    friend std::ostream &operator<<(std::ostream &os, const Graph &G);
 };
 
-void Digraph::addEdge(int v, int w)
+void Graph::addEdge(int v, int w)
 {
     for (int temp : adj(v))
         if (temp == w)
             return;
     if (v == w)
         return;
-    _adj[v].add(w); // 有向图只加一边
+    _adj[v].add(w);
+    _adj[w].add(v);
     edge_num++;
 }
 
-Digraph Digraph::reverse()
-{
-    Digraph reverse_digraph(vertex_num);
-    for (int i = 0; i < vertex_num; i++)
-        for (int v : _adj[i])
-            reverse_digraph.addEdge(v, i);
-    return reverse_digraph;
-}
-
-inline std::ostream &operator<<(std::ostream &os, const Digraph &G)
+inline std::ostream &operator<<(std::ostream &os, const Graph &G)
 {
     using namespace std;
     for (int i = 0; i < G.vertex_num; i++)
@@ -42,10 +32,10 @@ inline std::ostream &operator<<(std::ostream &os, const Digraph &G)
     return os;
 }
 
-Digraph createRondomDigraph(int size)
+Graph createRondomGraph(int size)
 {
     using namespace std;
-    Digraph new_graph(size);
+    Graph new_graph(size);
 
     default_random_engine e(time(0));
     uniform_int_distribution<unsigned> u(0, size - 1);

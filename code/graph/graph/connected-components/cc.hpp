@@ -1,7 +1,7 @@
 #ifndef CC_HPP
 #define CC_HPP
 
-#include "../base/undirected-graph.hpp"
+#include "../../base/graph.hpp"
 
 class CC
 {
