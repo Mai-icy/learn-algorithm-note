@@ -89,7 +89,7 @@ WeightedDigraph WeightedDigraph::reverse() const
     return reverse_digraph;
 }
 
-WeightedDigraph createRondomDigraph(int size)
+WeightedDigraph createRondomWeightedDigraph(int size)
 {
     using namespace std;
     WeightedDigraph new_graph(size);
