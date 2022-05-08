@@ -8,8 +8,8 @@ typedef std::priority_queue<Edge, std::vector<Edge>, std::greater<Edge>> edge_pq
 class MST
 {
 public:
-    MST();
-    Bag<DirectedEdge> edges();
+    MST(WeightedGraph G);
+    Bag<Edge> edges();
     double weight();
 
 private:

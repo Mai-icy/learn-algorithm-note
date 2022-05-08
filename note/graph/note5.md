@@ -245,9 +245,158 @@ graph TB
 
 思路：
 
+1.以一个起点开始，将这个点周边的点和它们到起点的边的权值加入队列
 
+2.在增长新的节点后，将新点周边的点和它们到新点的边的权值“设置”入队列
 
+“设置”是指若队列中已存在该点，比较新权值和旧权值，小的留下。若不存在则直接加入
 
+3.以此类推
+
+实现：
+
+```c++
+#include "MST.hpp"
+
+class PrimMST
+{
+public:
+    PrimMST(WeightedGraph G);
+    ~PrimMST() { delete[] marked, distTo; }
+    Bag<Edge> edges() const { return mst; }
+    double weight() const;
+
+private:
+    point_pq pq;
+    bool *marked;
+    double *distTo;
+    Edge *edgeTo;
+    Bag<Edge> mst;
+
+    void visit(WeightedGraph G, int v);
+};
+
+PrimMST::PrimMST(WeightedGraph G) : marked(new bool[G.V()]), distTo(new double[G.V()])
+{
+}
+
+void PrimMST::visit(WeightedGraph G, int v)
+{
+    marked[v] = true;
+    for (Edge e : G.adj(v))
+    {
+        int w = e.other(v);
+        if (marked[w])
+            continue;
+        if (e.weight() < distTo[w])
+        {
+            edgeTo[w] = e;
+
+            distTo[w] = e.weight();
+            ele new_ele(w, distTo[w]);
+            pq_update(pq,  new_ele);
+        }
+    }
+}
+
+void pq_update(point_pq &pq, const ele &new_data)
+{
+    point_pq temp;
+    temp.swap(pq);
+    while (!temp.empty())
+    {
+        ele top_edge = temp.top();
+        temp.pop();
+        if (new_data.first == top_edge.first)
+        {
+            pq.push(new_data);
+            break;
+        }
+        else
+            pq.push(top_edge);
+    }
+    while (!temp.empty())
+    {
+        ele top_edge = temp.top();
+        temp.pop();
+        pq.push(top_edge);
+    }
+}
+```
+
+分析：树增加节点的方式和延时版相同，从队列中取出最小权值的点，这个时候，我们仅获取了点，不知道是哪条边，故我们应额外维护一个数组edgeTo用来记录各个点的指向。
+
+特点：
+
+1.相比于延时版本，即时版本的特点就在“即时性”，指无效边会被即使删除。
+
+2.需要额外维护数组edgeTo以及数组distTo；edgeTo表示了最小的生成树的边，distTo表示了对应点的边的权值默认全为INF（无穷大）。
+
+3.可以不用marked数组判断是否被记录，因为它和判断distTo是否为INF同理。
+
+4.空间上限变为原来的常数因子。
+
+### KrusKal算法
+
+思路：
+
+1.将所有的边加入优先队列
+
+2.移出最小（权值）的边，加入最小生成树
+
+3.加入生成树时判断边的两点是否已被连接（已在树内）
+
+4.直至MST的数量达到V-1
+
+实现：
+
+```c++
+class KurskaiMST
+{
+public:
+    KurskaiMST(WeightedGraph G);
+    Bag<Edge> edges() const { return mst; }
+    double weight() const;
+
+private:
+    Bag<Edge> mst;
+};
+
+KurskaiMST::KurskaiMST(WeightedGraph G)
+{
+    edge_pq pq;
+    for (Edge e : G.edges())
+        pq.push(e);
+
+    UF uf(G.V());
+    while (!pq.empty() and mst.size() < G.V() - 1)
+    {
+        Edge e = pq.top();
+        pq.pop();
+        int v = e.either(), w = e.other(v);
+        if (uf.connected(w, v))
+            continue;
+        uf.connect(w, v);
+        mst.add(e);
+    }
+}
+
+double KurskaiMST::weight() const
+{
+    double total = 0.0;
+    for (Edge e : mst)
+    {
+        total += e.weight();
+    }
+    return total;
+}
+```
+
+特点：
+
+1.KrusKal算法是由森林最后结合成一棵树
+
+2.会储存所有的边一同进行排序
 
 ## 最短路径（SP）
 
