@@ -398,18 +398,114 @@ double KurskaiMST::weight() const
 
 2.会储存所有的边一同进行排序
 
+分析：
+
+需要耗费Edge优先队列，union-find结构
+
+对于使用UF是为了检测w和v是否连通，Kruskal算法在一幅图开始时是分散的，产生多颗树，这对于UF对象来说，很有使用价值。
+
 ## 最短路径（SP）
 
-| 接口             | 操作                          | 返回类型    |
-| ---------------- | ----------------------------- | ----------- |
-| SP               | 创建一个含有V个点无边的无向图 | 构造函数    |
-| distTo(int v)    | 从s点到v的距离（权值和）      | double      |
-| hasPathTo(int v) | 查看是否存在s到v的路径        | bool        |
-| pathTo(int v)    | 从s点到v的路径                | bag<有权边> |
+| 接口             | 操作                          | 返回类型          |
+| ---------------- | ----------------------------- | ----------------- |
+| SP               | 创建一个含有V个点无边的无向图 | 构造函数          |
+| distTo(int v)    | 从s点到v的距离（权值和）      | double            |
+| hasPathTo(int v) | 查看是否存在s到v的路径        | bool              |
+| pathTo(int v)    | 从s点到v的路径                | bag<DirectedEdge> |
 
+头文件
 
+```c++
+class SP
+{
+public:
+    SP(WeightedDigraph G, int s);
+    double distTo(int v) { return distTo_[v]; }
+    bool hasPathTo(int v) { return distTo_[v] < INFINITY; }
+    Bag<DirectedEdge> pathTo(int v);
 
+private:
+    int *distTo_;
+    DirectedEdge *edgeTo_;
+};
 
+Bag<DirectedEdge> SP::pathTo(int v)
+{
+    Bag<DirectedEdge> res_bag;
+    if (!hasPathTo(v))
+        return res_bag;
+    for (DirectedEdge e = edgeTo_[v]; e.from() != -1; e = edgeTo_[e.from()])
+        res_bag.add(e);
+    return res_bag;
+}
+```
+
+### 前提：
+
+松弛：一种基本操作
+
+```c++
+void relax(WeightedDigraph G, Edge e)
+{
+    int w = e.to();
+    if (distTo_[w] > distTo_[v] + e.weight())
+    {
+        distTo_[w] = distTo_[v] + e.weight();
+        edgeTo_[w] = e;
+    }
+}
+```
+
+点的松弛：和我们上面所描述的，是对于改点指出的所有边进行松弛
+
+```c++
+void relax(WeightedDigraph G, int v)
+{
+    for (DirectedEdge e : G.adj(v))
+    {
+        int w = e.to();
+        if (distTo_[w] > distTo_[v] + e.weight())
+        {
+            distTo_[w] = distTo_[v] + e.weight();
+            edgeTo_[w] = e;
+        }
+    }
+}
+```
+
+理论补充：
+
+最优性条件，对于松弛上例若为最小路径数时，则满足
+
+distTo[w] <= distTo[v] + e.weight()
+
+通用路径最短算法：
+
+起点为s将distTo[s]初始化为0，其他为inf，edgeTo[s]为空，edgeTo[v]为指向v的最小路径树上的边。
+
+### Dijkstra算法
+
+思路：类似于Prim，需要维护一个优先队列(同Prim即时算法)
+
+不同点：
+
+1.distTo数组存放值为点到起点的权值和，而并不是新点到邻树点的权值
+
+原因：Prim只存放边的权值，因为无向图的切分定理。而在有向图中，切分定理虽然有效，但是我们难以得到所有的横切边，由于边的有向，我们仅能获取每个点的指出边。Dijkstra算法利用“放松”点的方法，以确保最短的路径。
+
+对于下例：
+
+当树为012，仅能获得1->3, 2->5，故无法使用切分定理
+
+```mermaid
+graph TB
+0((0));1((1));2((2));3((3));4((4));5((5));
+
+1-->0;1-->3-->4-->0;2-->0;2-->5-->4;
+
+```
+
+2.marked数组不被使用，因为relax操作特点
 
 
 
