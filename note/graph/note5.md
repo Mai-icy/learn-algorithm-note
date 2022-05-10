@@ -505,7 +505,210 @@ graph TB
 
 ```
 
-2.marked数组不被使用，因为relax操作特点
+2.marked数组不被使用，因为relax操作的特点。例如上图，已经有1->3->4时，2->5->4仍需要被考虑，需要得到多种指向一点的多条路径，就要多次访问4顶点，这都是因为4不知道指向它的点。
+
+实现：
+
+```c++
+class DijkstraSP
+{
+public:
+    DijkstraSP(WeightedDigraph G, int s);
+    ~DijkstraSP() { delete[] distTo_, edgeTo_; }
+
+    double distTo(int v) const { return distTo_[v]; }
+    bool hasPathTo(int v) const { return distTo_[v] < INFINITY; }
+    Bag<DirectedEdge> pathTo(int v);
+
+private:
+    void relax(WeightedDigraph G, int v);
+    double *distTo_;
+    DirectedEdge *edgeTo_;
+    edge_pq pq;
+};
+
+void DijkstraSP::relax(WeightedDigraph G, int v)
+{
+    for (DirectedEdge e : G.adj(v))
+    {
+        int w = e.to();
+        if (distTo_[w] > distTo_[v] + e.weight())
+        {
+            distTo_[w] = distTo_[v] + e.weight();
+            edgeTo_[w] = e;
+            pq_update(pq, ele(w, distTo_[w]));
+        }
+    }
+}
+
+DijkstraSP::DijkstraSP(WeightedDigraph G, int s) : distTo_(new double[G.V()]), edgeTo_(new DirectedEdge[G.V()])
+{
+    for (int i = 0; i < G.V(); i++)
+        distTo_[i] = INFINITY;
+    distTo_[s] = 0;
+    pq.push(ele(s, 0.0));
+    while (!pq.empty())
+    {
+        relax(G, pq.top().first);
+        pq.pop();
+    }
+}
+
+Bag<DirectedEdge> DijkstraSP::pathTo(int v)
+{
+    Bag<DirectedEdge> res;
+    if (!hasPathTo(v))
+        return res;
+    for (DirectedEdge e = edgeTo_[v]; e.from() != -1; e = edgeTo_[e.from()])
+        res.add(e);
+    return res;
+}
+
+void pq_update(edge_pq &pq, const ele &new_data)
+{
+    edge_pq temp;
+    temp.swap(pq);
+    bool has_new = false;
+    while (!temp.empty())
+    {
+        ele top_ele = temp.top();
+        temp.pop();
+        if (top_ele.first == new_data.first)
+        {
+            pq.push(new_data);
+            has_new = true;
+        }
+        else
+            pq.push(top_ele);
+    }
+    if (has_new)
+    {
+        pq.push(new_data);
+    }
+}
+```
+
+分析：若是求解两点之间的最短路径，只需要在优先队列中取到t截止即可。
+
+对于欧拉图来说，Dijkstra有优化的解法。
+
+Dijkstra并不高效，但是可以解决问题，同样缺点还有不能解决负权重加权有向图问题
+
+### 无环加权有向图中的最短路径算法
+
+思路：
+
+1.distTo[s]初始化为0其他初始化为INF
+
+2.按照拓扑排序顺序对所有点进行relax操作
+
+特点：
+
+1.更快，更方便
+
+2.能够处理负权重有权图的问题
+
+3.还能解决额外的相关问题，比如最长路径
+
+4.是拓扑排序的拓展
+
+实现：
+
+```c++
+class AcyclicSP
+{
+public:
+    AcyclicSP(WeightedDigraph G, int s);
+    ~AcyclicSP() { delete[] distTo_, edgeTo_; }
+    double distTo(int v) const { return distTo_[v]; }
+    bool hasPathTo(int v) const { return distTo_[v] < INFINITY; }
+    Bag<DirectedEdge> pathTo(int v);
+
+private:
+    void relax(WeightedDigraph G, int v);
+
+    double *distTo_;
+    DirectedEdge *edgeTo_;
+};
+void AcyclicSP::relax(WeightedDigraph G, int v)
+{
+    for (DirectedEdge e : G.adj(v))
+    {
+        int w = e.to();
+        if (distTo_[w] > distTo_[v] + e.weight())
+        {
+            distTo_[w] = distTo_[v] + e.weight();
+            edgeTo_[w] = e;
+        }
+    }
+}
+
+AcyclicSP::AcyclicSP(WeightedDigraph G, int s) : distTo_(new double[G.V()]), edgeTo_(new DirectedEdge[G.V()])
+{
+    for (int i = 0; i < G.V(); i++)
+        distTo_[i] = INFINITY;
+    distTo_[s] = 0.0;
+    Topological top(remove_weight(G));
+    for (int v : top.order())
+    {
+        relax(G, v);
+    }
+}
+
+Digraph remove_weight(const WeightedDigraph &G)
+{
+    Digraph res(G.V());
+    for (DirectedEdge e:G.edges())
+        res.addEdge(e.from(), e.to());
+    return res;
+}
+```
+
+分析：
+
+对于加权有向图，对点的松弛需要有一定的顺序。无顺序的松弛，不能达到真正效果。
+
+```mermaid
+graph TB
+0((0));1((1));2((2));3((3));4((4));
+0 -->1-->2-->4;0-->3-->4;2-->3;
+```
+
+例如上图，如果relax的顺序是03412，那么此时，放松34后，进行12，放松2的时候对2->3边进行松弛，若此时0->3变为0->1->2->3那么dist[3]的值会被修改，但4的distTo值也应该被修改，改为distTo[4] = distTo[3] + e.weight()。但在松弛中没有这样操作，会导致在对2->4边进行松弛出现问题。
+
+总结以上就是，已经确定了4的距离，若3的距离减小，4应该同步更新。
+
+为了避免这样的情况，我们得出的结论就是松弛边时的指向点不能有已经被记录的点，也就是按照顺序，后面的点不能指向前面的点，也就是拓扑排序的顺序。
+
+总结以上就是，先松弛的点只能指向后松弛的点。
+
+最长路径实现：将distTo都初始化为0，改变relax函数中不等式的方向。
+
+#### 平行任务调度
+
+添加一条关于这个算法的应用
+
+要求：
+
+给定一组特定任务，以及任务各有不同的耗时，并且有先后要求，再加上在若干相同处理器上运行，安排任务在最短时间内完成。
+
+思路：
+
+1.创建无环加权有向图，包含起点和终点，任务和任务耗时用任务点以及它的指出边的权值来表示
+
+2.一个任务指出的边的权值，是其任务的费时
+
+3.一个任务必须在一个任务指向的任务之前完成
+
+4.设置起点s和终止点t，st之间的最长路径即为总耗时
+
+解决：使用最长路径的无环加权有向图中的最短路径算法实现即可。
+
+### Bellman-Ford算法（基于队列优化）
+
+
+
+
 
 
 
